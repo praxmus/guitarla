@@ -8,21 +8,71 @@ function App() {
     const [data, setData] = useState([])
     const [cart, setCart] = useState([])
 
+    const MAX_ITEMS = 5
+    const MIN_ITEMS = 1
+
     useEffect(()=> {
         setData(db)
     }, [])
 
     function addToCart(item){
-
         const itemExists = cart.findIndex((guitar) => guitar.id === item.id)
-        console.log(itemExists)
+        
+        //verifica si el elemento existe en el carrito
+        if (itemExists >= 0){
+            if (cart[itemExists].quantity >= MAX_ITEMS) return
+            console.log("Ya Existe...")
+            const updatedCart = [...cart]
+            updatedCart[itemExists].quantity++
+            setCart(updatedCart)            
+        } else{
+            console.log("No existe... Agregando...", item.id)
+            item.quantity = 1
+            setCart([...cart, item])
+        }        
+    }
 
-        setCart(prevCart => [...prevCart, item])
+    function removeFromCart(id){
+        console.log("Eliminando...", id)
+        setCart(prevCart => prevCart.filter(guitar => guitar.id !== id))
+    }
+
+    function decreaseQuantity(id){
+        const updatedCart = cart.map(item => {
+            if (item.id === id && item.quantity > MIN_ITEMS){
+                console.log("Reduciendo...", id)
+                return{
+                    ...item, quantity: item.quantity-1
+                }
+            }
+            return item
+        })
+
+        setCart(updatedCart)
+    }
+
+    function increaseQuantity(id){
+        const updatedCart = cart.map(item => {
+            if (item.id === id && item.quantity < MAX_ITEMS){
+                console.log("Incrementando...", id)
+                return{
+                    ...item, quantity: item.quantity+1
+                }
+            }
+            return item
+        })
+
+        setCart(updatedCart)
     }
 
     return (
         <>
-            <Header />
+            <Header                 
+                cart={cart}   
+                removeFromCart={removeFromCart} 
+                increaseQuantity={increaseQuantity}
+                decreaseQuantity={decreaseQuantity}
+            />
             <main className="container-xl mt-5">
                 <h2 className="text-center">Nuestra Colección</h2>
 
